@@ -15,17 +15,14 @@ def test_prepare_data_copy_files_success():
     `shutil.copy` function is called with the correct arguments.
     """
     with patch("pathlib.Path.exists", return_value=True), \
-         patch("pathlib.Path.is_file", return_value=True), \
          patch("pathlib.Path.mkdir") as mock_mkdir, \
-         patch("shutil.copy") as mock_copy:
+         patch("shutil.copytree") as mock_copy:
         
         input_json = {
             "data": ["/valid/local/path", "user_subpath/file.txt"],
             "parameters": {"method": "copy_files", "username": "testuser"},
         }
-        print("stica-1")
         response = client.post("/prepare-data", json=input_json)
-        print(f"stica-2 {response}")
         assert response.status_code == 200
         assert response.json() == {"status": "success", "target_path": "user_areas/testuser/user_subpath/file.txt"}
         mock_mkdir.assert_called_once()
@@ -41,7 +38,6 @@ def test_prepare_data_symlink_success():
     `os.symlink` function is called with the correct arguments.
     """
     with patch("pathlib.Path.exists", return_value=True), \
-         patch("pathlib.Path.is_file", return_value=True), \
          patch("pathlib.Path.mkdir") as mock_mkdir, \
          patch("os.symlink") as mock_symlink:
         
@@ -65,9 +61,7 @@ def test_prepare_data_invalid_method():
     Verifies that the response JSON includes the correct error message.
     """
     with patch("pathlib.Path.exists", return_value=True), \
-         patch("pathlib.Path.is_file", return_value=True), \
-         patch("pathlib.Path.mkdir") as mock_mkdir, \
-         patch("os.symlink") as mock_symlink:
+         patch("pathlib.Path.mkdir") as mock_mkdir:
     
         input_json = {
             "data": ["/valid/local/path", "user_subpath/file.txt"],
@@ -109,7 +103,6 @@ def test_prepare_data_target_path_already_exists():
     Verifies that the response JSON includes the "Target path already exists." detail.
     """
     with patch("pathlib.Path.exists", return_value=True), \
-         patch("pathlib.Path.is_file", return_value=True), \
          patch("pathlib.Path.mkdir", side_effect=FileExistsError("Target path already exists.")):
         
         input_json = {
@@ -150,7 +143,6 @@ def test_prepare_data_unexpected_error():
     Verifies that the response JSON includes the error message.
     """
     with patch("pathlib.Path.exists", return_value=True), \
-         patch("pathlib.Path.is_file", return_value=True), \
          patch("pathlib.Path.mkdir", side_effect=Exception("Unexpected error")):
         
         input_json = {

@@ -23,8 +23,24 @@ class DataRequest(BaseModel):
 
 @app.post("/prepare-data")
 async def prepare_data(request: DataRequest):
-    
-    exception = None
+    """
+    Prepares data by either copying files or creating symbolic links.
+
+    Args:
+    request: DataRequest
+        A DataRequest object containing the local path on storage, the relative
+        path in the user area, the method to use (copy_files or create_symlink),
+        and the username.
+
+    Returns:
+    dict: A dictionary with a "status" key set to "success" and a "target_path"
+        key set to the path of the prepared data.
+
+    Raises:
+    HTTPException: If the local path does not exist, the target path already
+        exists, or the method is unsupported.
+    """
+
     try:
         local_path, relative_path = request.data
         method = request.parameters["method"]
@@ -36,25 +52,21 @@ async def prepare_data(request: DataRequest):
         if not local_path.exists():
             raise HTTPException(status_code=400, detail="Local path does not exist.")
             
-
-        if not local_path.is_file():  # Ensure it's a file
-            raise HTTPException(status_code=400, detail="Local path must be a file.")
-
         user_area = Path(f"user_areas/{username}")
         target_path = user_area / relative_path
-        print("stica")
-        try:
-            user_area.mkdir(parents=True, exist_ok=True)
-        except FileExistsError: 
-            raise HTTPException(status_code=400, detail="Target path already exists.")
-        
+
+        user_area.mkdir(parents=True, exist_ok=True)
+      
         if method == "copy_files":
-            shutil.copy(local_path, target_path)
+            shutil.copytree(local_path, target_path)
         elif method == "create_symlink":
             os.symlink(local_path, target_path)
         else:
             raise HTTPException(status_code=400, detail=f"Unsupported method: {method}")
-    
+
+    except FileExistsError: 
+            raise HTTPException(status_code=400, detail="Target path already exists.")
+
     except Exception as exc:
         logger.error(f"Error processing request: {str(exc)}")
         if type(exc) == HTTPException:
@@ -62,5 +74,6 @@ async def prepare_data(request: DataRequest):
         raise HTTPException(status_code=500, detail=f"Error processing request: {str(exc)}")     
 
     logger.info(f"Data prepared for user {username} with method {method}.")
+
     return {"status": "success", "target_path": str(target_path)}
 
