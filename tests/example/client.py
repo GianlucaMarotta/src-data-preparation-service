@@ -1,9 +1,10 @@
 import requests
 import json
 
-url = "http://127.0.0.1:8000/prepare-data"
+url = "http://localhost:8000/prepare-data"
+filename = "request_copy.json"
 
-with open("request.json", "r") as f:
+with open(filename, "r") as f:
     data = json.load(f)
 
 response = requests.post(url, json=data)

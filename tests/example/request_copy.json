@@ -1,0 +1,7 @@
+{
+  "data": ["../../tests/example/localstorage", "data"],
+  "parameters": {
+    "method": "copy_files",
+    "username": "gianluca_marotta"
+  }
+}
