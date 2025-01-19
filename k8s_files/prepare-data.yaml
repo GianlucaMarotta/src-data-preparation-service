@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: preparedata-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: preparedata
+  template:
+    metadata:
+      labels:
+        app: preparedata
+    spec:
+      containers:
+      - name: prepatedata-container
+        image: prepare-data:0.1.0
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: user-areas-volume
+          mountPath: /user_areas
+        - name: local-storage
+          mountPath: /app/localstorage
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: user-areas-volume
+        persistentVolumeClaim:
+          claimName: user-areas-pvc
+      - name: local-storage
+        persistentVolumeClaim:
+          claimName: local-storage-pvc  

@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "src_data_preparation"
+version = "0.1.0"
+description = "A simple preparation service for SRC data"
+authors = ["GianlucaMarotta <gianlucamarotta18@gmail.com>"]
+readme = "README.md"
+license = "BSD-3-Clause"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.115.6"
+uvicorn = "^0.34.0"
+pydantic = "^2.10.5"
+requests = "^2.32.3"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1.1"
+httpx = "^0.28.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
