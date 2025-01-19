@@ -1,2 +1,3 @@
-__pychache__
+__pycache__
 .pytest_cache
+src/src_data_preparation/__pycache__/
