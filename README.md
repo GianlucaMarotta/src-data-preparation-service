@@ -62,9 +62,123 @@ This project is a personal prototype for demonstration purpose, it is not meant 
 
 ## Installation
 
-## Running Tests
+The dependencies of this project should be installed and set up using **Poetry**.
 
-## Deploying in K8s
+Poetry is a tool for managing Python dependencies and projects, and it simplifies the process of managing virtual environments.
+
+If you haven't already installed Poetry, follow the instructions on the [Poetry installation page](https://python-poetry.org/docs/#installation).
+
+
+### Install dependencies
+
+Once Poetry is installed, navigate to the project directory and run the following command to install the project and its dependencies:
+```
+poetry install
+```
+This will create a virtual environment and install all required dependencies as defined in pyproject.toml.
+
+To install on the system without creating the virtual enviroment:
+```
+poetry config virtualenvs.create false && poetry install
+```
+
+### Activate the virtual environment (optional)
+Poetry manages virtual environments automatically. To activate the environment, use:
+  ```
+  poetry shell
+  ```
+
+  > **_NOTE:_**
+  >`poetry shell` has been removed since poetry v2.0.0. use `poetry env activate` instead.
+
+## Run tests
+
+Unit tests are present in the folder `tests/unit`. After installing the project, to run them: 
+```
+pytest
+```
+To run a specific test: 
+```
+pytest -k <test_name>
+```
+
+## Example Usage
+
+### Running the service
+
+After installation, to run the FastAPI service:
+```
+uvicorn prepare_data_service:app --host <hostname> --port 8000 --reload
+```
+
+### Request
+
+Request on the service can be sent via an HTTP client as curl 
+
+```bash
+curl -X POST "http://<hostname>:8000/prepare-data" \
+-H "Content-Type: application/json" \
+-d '{
+  "data": ["/path/to/local/storage/", "relative/path/in/user/area/"],
+  "parameters": {
+    "method": "<method_name>",
+    "username": "<user_name>"
+  }
+}'
+```
+
+or with the use of a simple python script, as the one in `tests/example/client.py`
+
+## Containerization with Docker
+
+This section explains how to containerize the data preparation service using Docker, ensuring portability and ease of deployment across different environments. 
+
+If not installed please install Docker from Docker's official website
+
+### Steps to Build and Run the Container
+
+Follow these steps to build and run the Docker container for the service.
+
+#### Build the Docker Image
+
+The following command should be used to build the Docker image. This command installs dependencies using Poetry and sets up the service inside the container:
+```
+docker build -t prepare-data:0.1.0 .
+```
+
+#### Run the Docker Container
+
+To start the container, run the following command:
+```
+docker run
+  -p 8000:8000 \
+  -v /path/to/localstorage:/app/localstorage \
+  -v /path/to/user_areas:/app/user_areas \
+  prepare-data:0.1.0
+```
+with this command, we are exposing the port 8000 to the host and mounting as volumes the localstorage and userareas
+
+### Access the Service
+
+Once the container is running, access the API by making requests to:
+
+http://localhost:8000/process
+
+Request can be sent with methods cited in the previous section. Be sure to use `localhost` as `<hostname>`.
+
+NOTE: The paths in the request must be the ones of the running container and not the ones of the host (e.g. /app/localstorage and not /path/to/localstorage)
+
+## Deploying in K8s (WIP)
+
+This service will have its natural deployment in a cluster with kubernetes services running. Preliminary settings are present in the folder `k8s_files`. Having a k8s cluster active, or a `minikube` a namespace containing the service can be deployed with:
+```
+make deploy
+```
+to remove the namespace: 
+```
+make delete
+```
+
 
 ## Project Structure
 ```
@@ -80,28 +194,6 @@ This project is a personal prototype for demonstration purpose, it is not meant 
 ├── tests # Unit tests ad examples to be run manually
 ```
 
-## Example Usage
-
-### Request
-```bash
-curl -X POST "http://127.0.0.1:8000/prepare-data" \
--H "Content-Type: application/json" \
--d '{
-  "data": ["/path/to/source/file.txt", "destination/file.txt"],
-  "parameters": {
-    "method": "copy_files",
-    "username": "johndoe"
-  }
-}'
-```
-
-### Response
-```json
-{
-  "status": "success",
-  "target_path": "user_areas/johndoe/destination/file.txt"
-}
-```
 ## License
 This project is licensed under the BSD-3-Clause License. See `LICENSE` for more details.
 
