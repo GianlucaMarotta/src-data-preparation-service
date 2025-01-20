@@ -1,19 +1,20 @@
 # SRC Data Preparation Service
 
 ## Overview
-This project provides a FastAPI-based web service to prepare user data by either copying files or creating symbolic links. The service allows users to specify methods and target paths for file preparation.
-This project is a personal prototype for demonstration purpose, it is not meant to be used in production and it is not official code of SRC project. 
+This project provides a FastAPI-based web service for preparing user data by either copying files or creating symbolic links. Users can specify methods and target paths for file preparation.
+
+**Note:** This project is a personal prototype intended for demonstration purposes only. It is not designed for production use and is not an official SRC project.
 
 ## Features
-- Validate local file paths.
-- Create user-specific directories.
-- Copy files or create symbolic links based on user requests.
+- Validation of local file paths.
+- Creation of user-specific directories.
+- File copying or symbolic link creation based on user requests.
 - Error handling for invalid paths, unsupported methods, and existing files.
 
 ## Endpoints
 
 ### `POST /prepare-data`
-**Description**: Prepares data by either copying files or creating symbolic links.
+**Description:** Prepares data by either copying files or creating symbolic links.
 
 #### Request Body
 ```json
@@ -32,7 +33,7 @@ This project is a personal prototype for demonstration purpose, it is not meant 
   - `username`: The name of the user for whom the data is being prepared.
 
 #### Responses
-- **200 OK**: Success response with the target path.
+- **200 OK**: Successful operation with the target path.
   ```json
   {
     "status": "success",
@@ -45,29 +46,25 @@ This project is a personal prototype for demonstration purpose, it is not meant 
     "detail": "Error message"
   }
   ```
-- **500 Internal Server Error**: Unexpected errors during processing.
-
-- **422 Unprocessable Entity**: Mandatory values are missing in input
+- **500 Internal Server Error**: Unexpected processing errors.
+- **422 Unprocessable Entity**: Missing mandatory input values.
   ```json
   {
     "detail": [
-        {
+      {
         "loc": ["body", "parameters"],
         "msg": "Parameters must include 'method' and 'username'",
         "type": "value_error"
-        }
+      }
     ]
   }
   ```
 
 ## Installation
 
-The dependencies of this project should be installed and set up using **Poetry**.
+Project dependencies should be installed and set up using **Poetry**, a dependency management tool for Python that simplifies virtual environment management.
 
-Poetry is a tool for managing Python dependencies and projects, and it simplifies the process of managing virtual environments.
-
-If you haven't already installed Poetry, follow the instructions on the [Poetry installation page](https://python-poetry.org/docs/#installation).
-
+If Poetry is not installed, follow the instructions on the [Poetry installation page](https://python-poetry.org/docs/#installation).
 
 ### Install dependencies
 
@@ -75,29 +72,28 @@ Once Poetry is installed, navigate to the project directory and run the followin
 ```
 poetry install
 ```
-This will create a virtual environment and install all required dependencies as defined in pyproject.toml.
+This command creates a virtual environment and installs all required dependencies as defined in `pyproject.toml`.
 
-To install on the system without creating the virtual enviroment:
+To install dependencies without creating a virtual environment:
 ```
 poetry config virtualenvs.create false && poetry install
 ```
 
 ### Activate the virtual environment (optional)
 Poetry manages virtual environments automatically. To activate the environment, use:
-  ```
-  poetry shell
-  ```
+```
+poetry shell
+```
+> **_NOTE:_**
+> The command `poetry shell` has been deprecated since Poetry v2.0.0. Use `poetry env activate` instead.
 
-  > **_NOTE:_**
-  >`poetry shell` has been removed since poetry v2.0.0. use `poetry env activate` instead.
+## Running Tests
 
-## Run tests
-
-Unit tests are present in the folder `tests/unit`. After installing the project, to run them: 
+Unit tests are located in the `tests/unit` directory. After installing the project, run the tests with:
 ```
 pytest
 ```
-To run a specific test: 
+To run a specific test:
 ```
 pytest -k <test_name>
 ```
@@ -106,15 +102,14 @@ pytest -k <test_name>
 
 ### Running the service
 
-After installation, to run the FastAPI service:
+After installation, start the FastAPI service with:
 ```
 uvicorn prepare_data_service:app --host <hostname> --port 8000 --reload
 ```
 
-### Request
+### Sending Requests
 
-Request on the service can be sent via an HTTP client as curl 
-
+You can send requests using an HTTP client such as `curl`:
 ```bash
 curl -X POST "http://<hostname>:8000/prepare-data" \
 -H "Content-Type: application/json" \
@@ -126,76 +121,72 @@ curl -X POST "http://<hostname>:8000/prepare-data" \
   }
 }'
 ```
-
-or with the use of a simple python script, as the one in `tests/example/client.py`
+Alternatively, use the provided Python script located in `tests/example/client.py`.
 
 ## Containerization with Docker
 
-This section explains how to containerize the data preparation service using Docker, ensuring portability and ease of deployment across different environments. 
+This section explains how to containerize the data preparation service using Docker, ensuring portability and ease of deployment across different environments.
 
-If not installed please install Docker from Docker's official website
+If Docker is not installed, download it from [Docker's official website](https://www.docker.com/get-started).
 
 ### Steps to Build and Run the Container
 
-Follow these steps to build and run the Docker container for the service.
-
 #### Build the Docker Image
 
-The following command should be used to build the Docker image. This command installs dependencies using Poetry and sets up the service inside the container:
+To build the Docker image, use the following command:
 ```
 docker build -t prepare-data:0.1.0 .
 ```
 
 #### Run the Docker Container
 
-To start the container, run the following command:
+To start the container, run:
 ```
-docker run
+docker run \
   -p 8000:8000 \
   -v /path/to/localstorage:/app/localstorage \
   -v /path/to/user_areas:/app/user_areas \
   prepare-data:0.1.0
 ```
-with this command, we are exposing the port 8000 to the host and mounting as volumes the localstorage and userareas
+This command exposes port 8000 to the host and mounts the `localstorage` and `user_areas` directories as volumes.
 
-### Access the Service
+### Accessing the Service
 
-Once the container is running, access the API by making requests to:
+Once the container is running, access the API at:
 
 http://localhost:8000/process
 
-Request can be sent with methods cited in the previous section. Be sure to use `localhost` as `<hostname>`.
+Requests can be sent using the methods described earlier. Be sure to use `localhost` as the `<hostname>`.
 
-NOTE: The paths in the request must be the ones of the running container and not the ones of the host (e.g. /app/localstorage and not /path/to/localstorage)
+**Note:** Paths specified in requests must match the container paths (e.g., `/app/localstorage` instead of `/path/to/localstorage`).
 
-## Deploying in K8s (WIP)
+## Deployment in Kubernetes (WIP)
 
-This service will have its natural deployment in a cluster with kubernetes services running. Preliminary settings are present in the folder `k8s_files`. Having a k8s cluster active, or a `minikube` a namespace containing the service can be deployed with:
+This service is intended to be deployed in a Kubernetes cluster. Preliminary configurations can be found in the `k8s_files` directory. If a Kubernetes cluster (or Minikube) is active, deploy the service with:
 ```
 make deploy
 ```
-to remove the namespace: 
+To remove the deployment:
 ```
 make delete
 ```
 
-
 ## Project Structure
 ```
 .
-├── Dockerfile # Dockerfile for containerizing the application 
-├── k8s_files # Kubernetes configuration files for deployment 
-├── LICENSE # License file for the project 
-├── Makefile # Automation script for common tasks  
-├── poetry.lock # Poetry lock file to ensure consistent dependencies 
-├── pyproject.toml # Poetry configuration file for project metadata and dependencies 
-├── README.md # Project README file (this file)  
-├── src # Source code for the application │  
-├── tests # Unit tests ad examples to be run manually
+├── Dockerfile          # Docker configuration for containerization
+├── k8s_files           # Kubernetes deployment configurations
+├── LICENSE             # License information
+├── Makefile            # Automation script for common tasks
+├── poetry.lock         # Dependency lock file
+├── pyproject.toml       # Project metadata and dependencies
+├── README.md            # Project documentation (this file)
+├── src                  # Application source code
+├── tests                # Unit tests and examples
 ```
 
 ## License
-This project is licensed under the BSD-3-Clause License. See `LICENSE` for more details.
+This project is licensed under the BSD-3-Clause License. See the `LICENSE` file for more details.
 
 ## Contact
 For inquiries, please contact `gianlucamarotta18@gmail.com`.
