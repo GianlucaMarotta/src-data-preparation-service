@@ -162,11 +162,21 @@ Requests can be sent using the methods described earlier. Be sure to use `localh
 
 ## Deployment in Kubernetes (WIP)
 
-This service is intended to be deployed in a Kubernetes cluster. Preliminary configurations can be found in the `k8s_files` directory. If a Kubernetes cluster (or Minikube) is active, deploy the service with:
+This service is designed to be deployed in a Kubernetes cluster. The initial configuration files are available in the k8s_files directory. If a Kubernetes cluster (or Minikube) is running, the service can be deployed by executing:
 ```
 make deploy
 ```
-To remove the deployment:
+The Kubernetes deployment includes the following components:
+
+- A pod running the Data Preparation Service.
+- A service exposing port 8000 of the Data Preparation Service within the cluster.
+- A pod acting as an HTTP client for testing purposes.
+- A volume that mounts the localstorage directory from the host (this can be replaced with a distributed filesystem in the future).
+- A volume that mounts the user_areas directory from the host (this can also be replaced with a distributed filesystem in the future).
+
+Both volumes are mounted in the pod running the Data Preparation Service. This pod manages data operations on the volumes, ensuring that any other pod mounting them can access the prepared data.
+
+To remove the deployment, run:
 ```
 make delete
 ```
