@@ -19,7 +19,7 @@ spec:
         - containerPort: 8000
         volumeMounts:
         - name: user-areas-volume
-          mountPath: /user_areas
+          mountPath: /app/user_areas
         - name: local-storage
           mountPath: /app/localstorage
         resources:
